@@ -1,5 +1,7 @@
 # Đầu chờ SSO
 
+Giao diện SSO hiện được tạm ẩn theo yêu cầu: menu, thẻ kết nối ở Tổng quan và đường dẫn mở SSO. Cấu hình nhà cung cấp được giữ nguyên. Khi cần hiện lại, đặt `showSso: true` trong `lib/cms/features.ts`, đóng gói lại module và khởi động lại Directus.
+
 CMS dùng đăng nhập và phiên của Directus. Module VTV sử dụng `useApi()` của Directus để lấy API client hiện tại; không lưu access token hoặc client secret trong localStorage.
 
 ## OpenID Connect (mặc định)

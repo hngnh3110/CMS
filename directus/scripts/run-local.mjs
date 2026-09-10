@@ -1,9 +1,10 @@
 import { spawn } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '../..');
 process.loadEnvFile(resolve(root, '.env'));
-if (!process.env.DIRECTUS_CLI)
+const cli = process.env.DIRECTUS_CLI || resolve(root, '.runtime/directus/node_modules/directus/cli.js');
+if (!existsSync(cli))
   throw Error(
     'Set DIRECTUS_CLI to the installed Directus 11.17.4 cli.js; use Node 22.',
   );
@@ -23,9 +24,13 @@ const env = {
 };
 const child = spawn(
   process.execPath,
-  [process.env.DIRECTUS_CLI, process.argv[2] || 'start'],
+  [cli, process.argv[2] || 'start'],
   { cwd: root, env, stdio: 'inherit' },
 );
+child.on('error', (error) => {
+  console.error('Không khởi động được Directus:', error.message);
+  process.exit(1);
+});
 child.on('exit', (code) => process.exit(code ?? 1));
 process.on('SIGTERM', () => child.kill('SIGTERM'));
 process.on('SIGINT', () => child.kill('SIGINT'));

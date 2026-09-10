@@ -1,5 +1,12 @@
 import { defineModule, useApi } from '@directus/extensions-sdk';
-import { defineComponent, h, onMounted, onBeforeUnmount, ref } from 'vue';
+import {
+  defineComponent,
+  h,
+  inject,
+  onMounted,
+  onBeforeUnmount,
+  ref,
+} from 'vue';
 import { createRoot, type Root } from 'react-dom/client';
 import CmsApp from '../../../components/cms/app';
 import '../../../app/globals.css';
@@ -8,6 +15,12 @@ const Module = defineComponent({
   setup() {
     const host = ref<HTMLElement>();
     const api = useApi();
+    const head = inject<{
+      push: (input: { title: string; titleTemplate: null }) => {
+        dispose: () => void;
+      };
+    }>('usehead');
+    let titleEntry: { dispose: () => void } | undefined;
     let root: Root;
     const request = async (
       path: string,
@@ -28,6 +41,10 @@ const Module = defineComponent({
       }
     };
     onMounted(() => {
+      titleEntry = head?.push({
+        title: 'Hệ thống quản trị dữ liệu dashboard',
+        titleTemplate: null,
+      });
       document.head.appendChild(vtvStyle);
       if (host.value) {
         root = createRoot(host.value);
@@ -35,6 +52,7 @@ const Module = defineComponent({
       }
     });
     onBeforeUnmount(() => {
+      titleEntry?.dispose();
       root?.unmount();
       vtvStyle.remove();
     });

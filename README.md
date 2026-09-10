@@ -4,8 +4,10 @@ Hệ thống quản trị riêng cho 5 chuyên mục của Dashboard VTV, gồm 
 
 ## Mở hệ thống
 
-- Directus đang chạy thử trên máy: http://localhost:8055/admin/vtv-cms
-- Tài khoản quản trị cục bộ nằm trong `.env` (ADMIN_EMAIL / ADMIN_PASSWORD); mật khẩu được sinh ngẫu nhiên. Không đưa `.env` vào Git.
+- Directus cục bộ: http://localhost:8055/admin/vtv-cms
+- Trên máy Mac đã cài bộ chạy, bấm đúp **Mo CMS.command** để mở. Có thêm **Kiem tra CMS.command**, **Khoi dong lai CMS.command** và **Dung CMS.command**. Dịch vụ chạy nền, tự mở khi đăng nhập macOS; không cần giữ Terminal mở.
+- Xem **[hướng dẫn sử dụng chi tiết](docs/HUONG_DAN_SU_DUNG.md)**: đăng nhập, nhập tệp, kiểm tra, công bố, khôi phục, phân quyền, API/SSO, sao lưu và xử lý lỗi.
+- Tài khoản quản trị cục bộ nằm trong `.env` (ADMIN_EMAIL / ADMIN_PASSWORD). Không đưa `.env` vào Git. Thay hai biến này không cập nhật tài khoản đã tồn tại; đổi tài khoản/mật khẩu qua Directus.
 - Bản xem trước giao diện chạy từ `pnpm dev`. Đây là chế độ **dữ liệu minh họa trong bộ nhớ**, không phải cơ sở dữ liệu sản xuất; tải lại trang sẽ khôi phục dữ liệu mẫu. Tệp được xử lý trên trình duyệt và không gửi tới máy chủ Sites.
 - Directus thật khởi đầu không có báo cáo mẫu. Các mẫu dùng kiểm thử đã được dọn sau kiểm tra.
 
@@ -68,7 +70,7 @@ node directus/scripts/run-local.mjs start
 node --env-file=.env directus/scripts/bootstrap.mjs
 ```
 
-`run-local.mjs` dùng `.runtime/data.db`, `.runtime/uploads`, chỉ lắng nghe loopback. Phiên bản đang chạy trong môi trường làm việc dùng bộ Node/Directus cài riêng; khi máy khởi động lại cần chạy lại backend, hoặc dùng Docker cho vận hành dài hạn.
+`run-local.mjs` dùng `.runtime/data.db`, `.runtime/uploads`, chỉ lắng nghe loopback. Nó nhận `DIRECTUS_CLI` hoặc tìm bộ Directus tại `.runtime/directus/node_modules/directus/cli.js`. Trên máy Mac hiện tại, Node 22 và Directus đã được đặt ở `.runtime/node22` và `.runtime/directus`; `local-service.mjs` quản lý dịch vụ launchd độc lập với Terminal và tự chạy khi đăng nhập. Bộ chạy và dữ liệu cục bộ không nằm trong Git; máy mới cần cài riêng hoặc dùng Docker. Xem hướng dẫn vận hành ở cuối [tài liệu sử dụng](docs/HUONG_DAN_SU_DUNG.md).
 
 Kiểm tra tích hợp chỉ cho instance localhost dành cho thử nghiệm:
 

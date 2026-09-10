@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 export const metadata: Metadata = {
-  title: 'VTV CMS · Quản trị dữ liệu',
+  title: 'Hệ thống quản trị dữ liệu dashboard',
   description: 'Không gian quản trị dữ liệu Dashboard VTV.',
 };
 export default function RootLayout({

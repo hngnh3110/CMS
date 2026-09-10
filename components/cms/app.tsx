@@ -61,7 +61,10 @@ import ImportDialog, { Picker } from './import-dialog';
 import BatchDetail from './batch-detail';
 import Settings from './settings';
 import { registerCmsTools } from '@/lib/cms/webmcp';
+import { cmsFeatures } from '@/lib/cms/features';
+import vtvLogo from './assets/vtv-logo.webp?inline';
 const icons = [Landmark, Building2, FileText, Clock3, ListTodo];
+const ProfileContainer = cmsFeatures.showSso ? 'button' : 'div';
 const statusText = {
   draft: 'Bản nháp',
   published: 'Đã công bố',
@@ -113,7 +116,10 @@ export default function CmsApp({ request }: { request?: RequestFn }) {
   useEffect(() => {
     const sync = () => {
       const path = window.location.hash.replace(/^#\/?/, '').split('/');
-      const id = path[0];
+      const id =
+        path[0] === 'sso' && !cmsFeatures.showSso ? 'overview' : path[0];
+      if (path[0] === 'sso' && !cmsFeatures.showSso)
+        window.history.replaceState(null, '', '#/overview');
       if (
         [
           'overview',
@@ -185,6 +191,7 @@ export default function CmsApp({ request }: { request?: RequestFn }) {
     setNotice('Đã lưu bản nháp ' + b.filename);
   }
   const nav = (id: string) => {
+    if (id === 'sso' && !cmsFeatures.showSso) id = 'overview';
     setPage(id);
     setQuery('');
     setFilter('all');
@@ -206,11 +213,13 @@ export default function CmsApp({ request }: { request?: RequestFn }) {
               nav('overview');
             }}
           >
-            <span className="vtv-logo">
-              <i>V</i>
-              <i>T</i>
-              <i>V</i>
-            </span>
+            <img
+              className="vtv-logo"
+              src={vtvLogo}
+              alt="VTV"
+              width={3840}
+              height={1582}
+            />
             <span className="brand-sep" />
             <strong>CMS</strong>
           </a>
@@ -255,17 +264,19 @@ export default function CmsApp({ request }: { request?: RequestFn }) {
               ['history', 'Lịch sử nhập liệu', History],
               ['api', 'Kết nối API', Link2],
               ['sso', 'Đăng nhập SSO', ShieldCheck],
-            ].map(([id, title, Icon]: any) => (
-              <button
-                key={id}
-                className={`nav-item ${page === id ? 'active' : ''}`}
-                onClick={() => nav(id)}
-              >
-                <Icon size={19} />
-                {title}
-                {id === 'sso' && <span className="tiny-dot" />}
-              </button>
-            ))}
+            ]
+              .filter(([id]) => id !== 'sso' || cmsFeatures.showSso)
+              .map(([id, title, Icon]: any) => (
+                <button
+                  key={id}
+                  className={`nav-item ${page === id ? 'active' : ''}`}
+                  onClick={() => nav(id)}
+                >
+                  <Icon size={19} />
+                  {title}
+                  {id === 'sso' && <span className="tiny-dot" />}
+                </button>
+              ))}
           </nav>
         </SidebarContent>
         <SidebarFooter>
@@ -276,7 +287,10 @@ export default function CmsApp({ request }: { request?: RequestFn }) {
               <small>Không gian quản trị dữ liệu</small>
             </div>
           </div>
-          <button className="profile" onClick={() => nav('sso')}>
+          <ProfileContainer
+            className="profile"
+            onClick={cmsFeatures.showSso ? () => nav('sso') : undefined}
+          >
             <span className="avatar">QT</span>
             <span>
               <strong>
@@ -286,8 +300,8 @@ export default function CmsApp({ request }: { request?: RequestFn }) {
                 {request ? 'Phiên đăng nhập hiện tại' : 'Không gian xem trước'}
               </small>
             </span>
-            <Settings2 size={17} />
-          </button>
+            {cmsFeatures.showSso && <Settings2 size={17} />}
+          </ProfileContainer>
         </SidebarFooter>
       </Sidebar>
       <div className="cms-workspace">
@@ -601,20 +615,22 @@ export default function CmsApp({ request }: { request?: RequestFn }) {
                       </div>
                       <span className="status-dot green" />
                     </div>
-                    <div className="connection-item">
-                      <span className="connection-icon purple">
-                        <ShieldCheck size={19} />
-                      </span>
-                      <div>
-                        <strong>Đăng nhập SSO</strong>
-                        <small>
-                          {info?.sso_configured
-                            ? 'Đã cấu hình nhà cung cấp'
-                            : 'Chờ cấu hình nhà cung cấp'}
-                        </small>
+                    {cmsFeatures.showSso && (
+                      <div className="connection-item">
+                        <span className="connection-icon purple">
+                          <ShieldCheck size={19} />
+                        </span>
+                        <div>
+                          <strong>Đăng nhập SSO</strong>
+                          <small>
+                            {info?.sso_configured
+                              ? 'Đã cấu hình nhà cung cấp'
+                              : 'Chờ cấu hình nhà cung cấp'}
+                          </small>
+                        </div>
+                        <span className="status-dot amber" />
                       </div>
-                      <span className="status-dot amber" />
-                    </div>
+                    )}
                     <button
                       className="secondary-btn full"
                       onClick={() => nav('api')}
@@ -622,28 +638,11 @@ export default function CmsApp({ request }: { request?: RequestFn }) {
                       Quản lý kết nối <ArrowRight size={15} />
                     </button>
                   </section>
-                  <section className="workflow-note">
-                    <span className="workflow-symbol">
-                      <CircleCheck size={21} />
-                    </span>
-                    <h3>Dữ liệu đúng. Dashboard tin cậy.</h3>
-                    <p>
-                      Tải tệp, kiểm tra dữ liệu và công bố. Mỗi thay đổi đều có
-                      phiên bản để tra cứu.
-                    </p>
-                    <div className="mini-flow">
-                      <span>Nhập tệp</span>
-                      <ChevronRight size={12} />
-                      <span>Kiểm tra</span>
-                      <ChevronRight size={12} />
-                      <span>Công bố</span>
-                    </div>
-                  </section>
                 </aside>
               )}
             </div>
           )}
-          {['api', 'sso'].includes(page) && (
+          {(page === 'api' || (cmsFeatures.showSso && page === 'sso')) && (
             <Settings
               page={page}
               native={!!request}

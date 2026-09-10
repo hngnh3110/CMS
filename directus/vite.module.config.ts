@@ -7,6 +7,8 @@ import { join } from 'node:path';
 const output = 'directus/extensions/vtv-module/dist';
 export default defineConfig({
   publicDir: false,
+  // Directus loads this library directly in the browser, without a Node process global.
+  define: { 'process.env.NODE_ENV': JSON.stringify('production') },
   plugins: [
     react(),
     {
