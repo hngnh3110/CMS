@@ -1,0 +1,1 @@
+{"name":"directus-extension-vtv-api","version":"1.0.0","type":"module","files":["dist"],"directus:extension":{"type":"endpoint","path":"dist/index.js","source":"index.ts","host":"11.17.4"}}

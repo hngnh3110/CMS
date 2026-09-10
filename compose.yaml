@@ -1,0 +1,66 @@
+services:
+  database:
+    image: postgres:16.10-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vtv_cms
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U directus -d vtv_cms']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  directus:
+    build:
+      context: .
+      dockerfile: directus/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8055:8055'
+    env_file: .env
+    environment:
+      DB_CLIENT: pg
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_DATABASE: vtv_cms
+      DB_USER: directus
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      SECRET: ${SECRET:?Set SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Set ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8055}
+      EXTENSIONS_AUTO_RELOAD: 'false'
+      EXTENSIONS_MUST_LOAD: 'true'
+      WEBSOCKETS_ENABLED: 'true'
+      CORS_ENABLED: 'true'
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://dashboard.vtv.gov.vn}
+      CORS_CREDENTIALS: 'true'
+      SESSION_COOKIE_SAME_SITE: lax
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      PAYLOAD_LIMIT: 8mb
+      FILES_MAX_UPLOAD_SIZE: 5mb
+      RATE_LIMITER_ENABLED: 'true'
+      RATE_LIMITER_POINTS: 100
+      RATE_LIMITER_DURATION: 60
+      TELEMETRY: 'false'
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - uploads:/directus/uploads
+  setup:
+    image: node:22-alpine
+    profiles: [setup]
+    env_file: .env
+    environment:
+      DIRECTUS_URL: http://directus:8055
+    volumes:
+      - ./directus/scripts:/scripts:ro
+    command: ['node','/scripts/bootstrap.mjs']
+    depends_on: [directus]
+volumes:
+  database:
+  uploads:

@@ -1,0 +1,1 @@
+{"name":"directus-extension-vtv-cms","version":"1.0.0","type":"module","files":["dist"],"directus:extension":{"type":"module","path":"dist/index.js","source":"index.tsx","host":"11.17.4"}}
